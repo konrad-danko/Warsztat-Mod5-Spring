@@ -59,4 +59,3 @@ public class Book {
         this.type = type;
     }
 }
-

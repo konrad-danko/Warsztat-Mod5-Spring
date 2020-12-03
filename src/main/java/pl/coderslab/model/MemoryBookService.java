@@ -14,32 +14,25 @@ import java.util.Optional;
 @Component
 //@Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.TARGET_CLASS)
 //@Scope(value = WebApplicationContext.SCOPE_APPLICATION, proxyMode = ScopedProxyMode.TARGET_CLASS)
-public class MemoryBookService {
+public class MemoryBookService implements BookService{
     private final List<Book> bookList;
-    private Long nextId;
-
-    public Long getNextId() {
-        return nextId;
-    }
-    public void setNextId(Long nextId) {
-        this.nextId = nextId;
-    }
+    private static Long nextId = 4L;
 
     public MemoryBookService() {
         this.bookList = new ArrayList<>();
-        this.nextId = 4L;
-
         this.bookList.add(new Book(1L, "9788324631766", "Thinking in Java", "Bruce Eckel", "Helion", "programming"));
         this.bookList.add(new Book(2L, "9788324627738", "Rusz głową Java.", "Sierra Kathy, Bates Bert", "Helion", "programming"));
         this.bookList.add(new Book(3L, "9780130819338", "Java 2. Podstawy", "Cay Horstmann, Gary Cornell", "Helion", "programming"));
     }
 
     //Pobieranie listy wszystkich książek
+    @Override
     public List<Book> getAllBooks() {
         return this.bookList;
     }
 
     //Pobieranie książki po wskazanym identyfikatorze
+    @Override
     public Optional<Book> getBook(Long id) {
         return this.bookList.stream()
                 .filter(book -> book.getId().equals(id))
@@ -47,23 +40,28 @@ public class MemoryBookService {
     }
 
     //Dodawanie książki
+    @Override
     public void addBook(Book book) {
+        book.setId(nextId);
         this.bookList.add(book);
+        nextId++;
     }
 
     //Edycja książki
+    @Override
     public void updateBook(Book book) {
         Long id = book.getId();
-        Book optionalBook = bookList.stream()
+        Book optionalBook = this.bookList.stream()
                 .filter(b -> b.getId().equals(id))
                 .findFirst().orElseThrow(() -> {
                     throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with id="+id+" exists in the database");
                 });
-        int index = bookList.indexOf(optionalBook);
-        bookList.set(index, book);
+        int index = this.bookList.indexOf(optionalBook);
+        this.bookList.set(index, book);
     }
 
     //Usuwanie książki
+    @Override
     public void removeBook(Book book) {
         this.bookList.remove(book);
     }

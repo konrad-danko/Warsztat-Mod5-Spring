@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import pl.coderslab.model.Book;
-import pl.coderslab.model.MemoryBookService;
+import pl.coderslab.model.BookService;
 
 import java.util.List;
 
@@ -13,24 +13,24 @@ import java.util.List;
 @RequestMapping("/books")
 public class BookController {
 
-    private final MemoryBookService memoryBookService;
+    private final BookService bookService;
 
     @Autowired
-    public BookController(MemoryBookService memoryBookService) {
-        this.memoryBookService = memoryBookService;
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
     }
 
     //Pobieranie listy wszystkich książek
     @GetMapping(path = "")
     private List<Book> getAllBooksAction() {
-        return memoryBookService.getAllBooks();
+        return bookService.getAllBooks();
     }
 
     //Pobieranie książki po wskazanym identyfikatorze
     @GetMapping(path = "/{id}")
     private Book getBookAction(@PathVariable Long id) {
-        return memoryBookService.getBook(id).orElseThrow(() -> {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with id="+id+" exists in the database");
+        return bookService.getBook(id).orElseThrow(() -> {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with id=" + id + " exists in the database");
         });
     }
 
@@ -41,10 +41,8 @@ public class BookController {
                                @RequestParam String author,
                                @RequestParam String publisher,
                                @RequestParam String type) {
-        Long id = memoryBookService.getNextId();
-        Book book = new Book(id, isbn, title, author, publisher, type);
-        memoryBookService.addBook(book);
-        memoryBookService.setNextId(id + 1);
+        Book book = new Book(isbn, title, author, publisher, type);
+        bookService.addBook(book);
     }
 
     //Edycja książki
@@ -56,15 +54,15 @@ public class BookController {
                                   @RequestParam String publisher,
                                   @RequestParam String type) {
         Book book = new Book(id, isbn, title, author, publisher, type);
-        memoryBookService.updateBook(book);
+        bookService.updateBook(book);
     }
 
     //Usuwanie książki
     @DeleteMapping(path = "/{id}")
     private void removeBookAction(@PathVariable Long id) {
-        Book book = memoryBookService.getBook(id).orElseThrow(() -> {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with id="+id+" exists in the database");
+        Book book = bookService.getBook(id).orElseThrow(() -> {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No record with id=" + id + " exists in the database");
         });
-        memoryBookService.removeBook(book);
+        bookService.removeBook(book);
     }
 }
